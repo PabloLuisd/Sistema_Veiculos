@@ -13,7 +13,7 @@ $id = $_POST["id"];
 $modelo = $_POST["modelo"];
 $marca_id = $_POST["marca_id"];
 $potencia = $_POST["potencia"];
-$ano = $_POST["ano_fabricacao"];
+$ano_fabricacao = $_POST["ano_fabricacao"];
 $tipo = $_POST["tipo"];
 
 $erros = [];
@@ -69,7 +69,7 @@ mysqli_stmt_bind_param(
     $modelo,
     $marca_id,
     $potencia,
-    $ano,
+    $ano_fabricacao,
     $tipo,
     $id
 );

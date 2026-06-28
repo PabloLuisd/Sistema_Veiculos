@@ -9,19 +9,56 @@ if (!isset($_SESSION["usuario_id"])) {
 
 require_once("config/conecta.php");
 
+$id = $_GET["id"] ?? 0;
+$editar = false;
+
+$modelo = "";
+$marca_id = "";
+$potencia = "";
+$ano_fabricacao = "";
+$tipo = "";
+
+if ($id > 0) {
+
+    $editar = true;
+
+    $sql = "SELECT * FROM veiculos WHERE id = ?";
+
+    $stmt = mysqli_prepare($conn, $sql);
+
+    mysqli_stmt_bind_param($stmt, "i", $id);
+
+    mysqli_stmt_execute($stmt);
+
+    $resultado = mysqli_stmt_get_result($stmt);
+
+    if (mysqli_num_rows($resultado) == 0) {
+        header("Location: dashboard.php");
+        exit;
+    }
+
+    $veiculo = mysqli_fetch_assoc($resultado);
+
+    $modelo = $veiculo["modelo"];
+    $marca_id = $veiculo["marca_id"];
+    $potencia = $veiculo["potencia"];
+    $ano_fabricacao = $veiculo["ano_fabricacao"];
+    $tipo = $veiculo["tipo"];
+}
+
 $sql = "SELECT id, marca FROM marcas ORDER BY marca";
 $resultadoMarcas = mysqli_query($conn, $sql);
 
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Novo Veículo</title>
+<title><?= $editar ? "Editar Veículo" : "Novo Veículo" ?></title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -56,7 +93,7 @@ $resultadoMarcas = mysqli_query($conn, $sql);
 
     .btn-salvar:hover{
         background:#63b7c3;
-    }
+}
 
 </style>
 
@@ -66,134 +103,144 @@ $resultadoMarcas = mysqli_query($conn, $sql);
 
 <div class="container-form">
 
-    <div class="card">
+<div class="card">
 
-        <div class="card-header">
-            Cadastro de Veículo
-        </div>
+<div class="card-header">
+<?= $editar ? "Editar Veículo" : "Cadastro de Veículo" ?>
+</div>
 
-        <div class="card-body">
+<div class="card-body">
 
-            <form method="POST" action="back/processa_veiculo.php">
+<form method="POST" action="<?= $editar ? "back/editar_veiculo.php" : "back/processa_veiculo.php" ?>">
 
-                <div class="mb-3">
-                    <label class="form-label">Modelo</label>
-                    <input
-                        type="text"
-                        name="modelo"
-                        class="form-control"
-                        required>
-                </div>
+<?php if($editar): ?>
+<input type="hidden" name="id" value="<?= $id ?>">
+<?php endif; ?>
 
-                <div class="mb-3">
-                    <label class="form-label">Marca</label>
+<div class="mb-3">
 
-                    <select
-                        name="marca_id"
-                        class="form-select"
-                        required>
+<label class="form-label">Modelo</label>
 
-                        <option value="">
-                            Selecione uma marca
-                        </option>
+<input
+type="text"
+name="modelo"
+class="form-control"
+value="<?= htmlspecialchars($modelo) ?>"
+required>
 
-                        <?php while($marca = mysqli_fetch_assoc($resultadoMarcas)): ?>
+</div>
 
-                            <option value="<?= $marca['id'] ?>">
-                                <?= $marca['marca'] ?>
-                            </option>
+<div class="mb-3">
 
-                        <?php endwhile; ?>
+<label class="form-label">Marca</label>
 
-                    </select>
+<select
+name="marca_id"
+class="form-select"
+required>
 
-                </div>
+<option value="">Selecione uma marca</option>
 
-                <div class="mb-3">
-                    <label class="form-label">Potência (CV)</label>
-                    <input
-                        type="number"
-                        name="potencia"
-                        class="form-control"
-                        min="1"
-                        required>
-                </div>
+<?php while($marca = mysqli_fetch_assoc($resultadoMarcas)): ?>
 
-                <div class="mb-3">
-                    <label class="form-label">Ano de Fabricação</label>
-                    <input
-                        type="number"
-                        name="ano_fabricacao"
-                        class="form-control"
-                        min="1900"
-                        max="<?= date('Y') ?>"
-                        required>
-                </div>
+<option
+value="<?= $marca["id"] ?>"
+<?= $marca["id"] == $marca_id ? "selected" : "" ?>>
 
-                <div class="mb-4">
-                    <label class="form-label d-block">
-                        Tipo
-                    </label>
+<?= htmlspecialchars($marca["marca"]) ?>
 
-                    <div class="form-check form-check-inline">
-                        <input
-                            class="form-check-input"
-                            type="radio"
-                            name="tipo"
-                            value="Carro"
-                            required>
+</option>
 
-                        <label class="form-check-label">
-                            Carro
-                        </label>
-                    </div>
+<?php endwhile; ?>
 
-                    <div class="form-check form-check-inline">
-                        <input
-                            class="form-check-input"
-                            type="radio"
-                            name="tipo"
-                            value="Moto">
+</select>
 
-                        <label class="form-check-label">
-                            Moto
-                        </label>
-                    </div>
+</div>
 
-                    <div class="form-check form-check-inline">
-                        <input
-                            class="form-check-input"
-                            type="radio"
-                            name="tipo"
-                            value="Caminhão">
+<div class="mb-3">
 
-                        <label class="form-check-label">
-                            Caminhão
-                        </label>
-                    </div>
+<label class="form-label">Potência (CV)</label>
 
-                </div>
+<input
+type="number"
+name="potencia"
+class="form-control"
+value="<?= htmlspecialchars($potencia) ?>"
+required>
 
-                <div class="d-flex justify-content-between">
+</div>
 
-                    <a href="dashboard.php" class="btn btn-secondary">
-                        Voltar
-                    </a>
+<div class="mb-3">
 
-                    <button
-                        type="submit"
-                        name="salvar"
-                        class="btn btn-salvar text-white">
-                        Salvar Veículo
-                    </button>
+<label class="form-label">Ano de Fabricação</label>
 
-                </div>
+<input
+type="number"
+name="ano_fabricacao"
+class="form-control"
+min="1900"
+max="<?= date("Y") ?>"
+value="<?= htmlspecialchars($ano_fabricacao) ?>"
+required>
 
-            </form>
+</div>
 
-        </div>
+<div class="mb-4">
 
-    </div>
+<label class="form-label d-block">Tipo</label>
+
+<?php
+$tipos = ["Carro","Moto","Caminhão"];
+
+foreach($tipos as $t):
+?>
+
+<div class="form-check form-check-inline">
+
+<input
+class="form-check-input"
+type="radio"
+name="tipo"
+value="<?= $t ?>"
+<?= $tipo == $t ? "checked" : "" ?>
+required>
+
+<label class="form-check-label">
+
+<?= $t ?>
+
+</label>
+
+</div>
+
+<?php endforeach; ?>
+
+</div>
+
+<div class="d-flex justify-content-between">
+
+<a href="dashboard.php" class="btn btn-secondary">
+
+Voltar
+
+</a>
+
+<button
+type="submit"
+name="salvar"
+class="btn btn-salvar text-white">
+
+<?= $editar ? "Atualizar Veículo" : "Salvar Veículo" ?>
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
 
 </div>
 

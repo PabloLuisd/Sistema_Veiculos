@@ -1,101 +1,66 @@
 <?php
+
 session_start();
 
 if (!isset($_SESSION["usuario_id"])) {
-    header("Location: index.php");
+    header("Location: ../index.php");
     exit;
 }
-?>
 
-<!DOCTYPE html>
-<html lang="pt-br">
-
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>Cadastro de Marca</title>
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<style>
-
-body{
-    background:#f4f7fa;
+if (!isset($_POST["salvar"])) {
+    header("Location: ../marca_form.php");
+    exit;
 }
 
-.container-form{
-    max-width:600px;
-    margin:50px auto;
+$marca = trim($_POST["marca"] ?? "");
+
+if (empty($marca)) {
+
+    $_SESSION["erro"] = "Informe o nome da marca.";
+
+    header("Location: ../marca_form.php");
+    exit;
 }
 
-.card{
-    border:none;
-    border-radius:15px;
-    box-shadow:0 5px 20px rgba(0,0,0,.1);
+require_once("../config/conecta.php");
+
+$sql = "SELECT id FROM marcas WHERE marca = ?";
+
+$stmt = mysqli_prepare($conn, $sql);
+
+mysqli_stmt_bind_param($stmt, "s", $marca);
+
+mysqli_stmt_execute($stmt);
+
+$resultado = mysqli_stmt_get_result($stmt);
+
+if (mysqli_num_rows($resultado) > 0) {
+
+    $_SESSION["erro"] = "Esta marca já está cadastrada.";
+
+    mysqli_close($conn);
+
+    header("Location: ../marca_form.php");
+    exit;
 }
 
-.card-header{
-    background:#252547;
-    color:white;
-    font-size:20px;
+$sql = "INSERT INTO marcas (marca) VALUES (?)";
+
+$stmt = mysqli_prepare($conn, $sql);
+
+mysqli_stmt_bind_param($stmt, "s", $marca);
+
+if (mysqli_stmt_execute($stmt)) {
+
+    $_SESSION["msg"] = "Marca cadastrada com sucesso!";
+
+} else {
+
+    $_SESSION["erro"] = "Erro ao cadastrar a marca.";
+
 }
 
-</style>
+mysqli_close($conn);
 
-</head>
-
-<body>
-
-<div class="container-form">
-
-    <div class="card">
-
-        <div class="card-header">
-            Cadastro de Marca
-        </div>
-
-        <div class="card-body">
-
-            <?php if(isset($_SESSION["erro"])): ?>
-                <div class="alert alert-danger">
-                    <?= $_SESSION["erro"] ?>
-                </div>
-                <?php unset($_SESSION["erro"]); ?>
-            <?php endif; ?>
-
-            <form method="POST" action="back/processa_marca.php">
-
-                <div class="mb-3">
-                    <label class="form-label">
-                        Nome da Marca
-                    </label>
-
-                    <input
-                        type="text"
-                        name="marca"
-                        class="form-control"
-                        required>
-                </div>
-
-                <a href="dashboard.php" class="btn btn-secondary">
-                    Voltar
-                </a>
-
-                <button
-                    type="submit"
-                    name="salvar"
-                    class="btn btn-success">
-                    Salvar
-                </button>
-
-            </form>
-
-        </div>
-
-    </div>
-
-</div>
-
-</body>
-</html>
+header("Location: ../marcas.php");
+exit;

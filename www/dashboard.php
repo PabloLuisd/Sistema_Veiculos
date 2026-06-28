@@ -184,9 +184,15 @@ $resultadoMarcas = mysqli_query($conn, $sqlMarcas);
                 <div>
 
                    <div class="d-flex gap-2">
+
+                        <a href="marcas.php" class="btn-add">
+                            Adicionar Marca
+                        </a>
+
                         <a href="veiculo_form.php" class="btn-add">
                             Adicionar Veículo
                         </a>
+                        
                     </div>
                 </div>
             </div>
@@ -278,91 +284,6 @@ $resultadoMarcas = mysqli_query($conn, $sqlMarcas);
             </table>
 
         </div>
-
-        <?php
-
-$sqlMarcas = "
-SELECT *
-FROM marcas
-ORDER BY marca
-";
-
-$resMarcas = mysqli_query($conn, $sqlMarcas);
-
-?>
-
-<div class="card-table mt-5">
-
-    <div class="table-header d-flex justify-content-between align-items-center">
-
-        <h4 class="m-0">
-            Marcas Cadastradas
-        </h4>
-
-        <a href="marca_form.php" class="btn-add">
-            Adicionar Marca
-        </a>
-
-    </div>
-
-    <table class="table table-hover align-middle">
-
-        <thead>
-            <tr>
-                <th width="100">ID</th>
-                <th>Marca</th>
-                <th width="120">Ações</th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-        <?php if(mysqli_num_rows($resMarcas) > 0): ?>
-
-            <?php while($marca = mysqli_fetch_assoc($resMarcas)): ?>
-
-                <tr>
-
-                    <td>
-                        <?= $marca["id"] ?>
-                    </td>
-
-                    <td>
-                        <?= htmlspecialchars($marca["marca"]) ?>
-                    </td>
-
-                    <td class="acoes">
-
-                        <a
-                            href="back/excluir_marca.php?id=<?= $marca["id"] ?>"
-                            class="excluir"
-                            title="Excluir"
-                            onclick="return confirm('Deseja excluir esta marca?')">
-                            🗑️
-                        </a>
-
-                    </td>
-
-                </tr>
-
-            <?php endwhile; ?>
-
-        <?php else: ?>
-
-            <tr>
-
-                <td colspan="3" class="sem-registros">
-                    Nenhuma marca cadastrada.
-                </td>
-
-            </tr>
-
-        <?php endif; ?>
-
-        </tbody>
-
-    </table>
-
 </div>
 
     </div>

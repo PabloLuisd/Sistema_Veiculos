@@ -40,7 +40,7 @@ if (mysqli_num_rows($resultado) > 0) {
     $_SESSION["erro"] =
         "Não é possível excluir esta marca, pois existem veículos vinculados a ela.";
 
-    header("Location: ../dashboard.php");
+    header("Location: ../marcas.php");
     exit;
 }
 
